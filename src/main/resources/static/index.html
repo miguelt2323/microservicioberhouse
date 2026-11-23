@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Beerhouse - Gestión de Categorías</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- ================= ENCABEZADO ================= -->
+  <header class="header">
+    <div class="brand">
+      <div class="brand-icon">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+        </svg>
+      </div>
+      <div class="brand-info">
+        <h1>Microservicio Beerhouse</h1>
+        <span>Módulo Categorías &bull; API REST</span>
+      </div>
+    </div>
+
+    <div class="api-badge">
+      <div class="pulse-dot"></div>
+      <span>MySQL (3306) &bull; HikariCP</span>
+    </div>
+  </header>
+
+  <!-- ================= CONTENEDOR PRINCIPAL ================= -->
+  <main class="main-content">
+
+    <!-- Panel de Búsqueda y Filtros de Paginación -->
+    <section class="panel-card">
+      <div class="controls-grid">
+
+        <!-- Búsqueda directa por ID (GET /api/categorias/{id}) -->
+        <div class="form-group">
+          <label for="searchIdInput">Consultar por ID de Categoría</label>
+          <div class="input-with-button">
+            <input type="number" id="searchIdInput" class="form-input" placeholder="Ej: 1, 2, 5..." min="1">
+            <button id="btnSearch" class="btn btn-primary" title="Buscar por ID">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              Buscar
+            </button>
+            <button id="btnClearSearch" class="btn btn-secondary" title="Limpiar y ver todo">
+              Limpiar
+            </button>
+          </div>
+        </div>
+
+        <!-- Ordenar por campo -->
+        <div class="form-group">
+          <label for="sortBySelect">Ordenar Por</label>
+          <select id="sortBySelect" class="form-select">
+            <option value="id_categoria" selected>ID Categoría</option>
+            <option value="nombre_categoria">Nombre Categoría</option>
+            <option value="descripcion">Descripción</option>
+          </select>
+        </div>
+
+        <!-- Dirección de orden -->
+        <div class="form-group">
+          <label for="sortDirSelect">Dirección</label>
+          <select id="sortDirSelect" class="form-select">
+            <option value="asc" selected>Ascendente (A-Z, 1-9)</option>
+            <option value="desc">Descendente (Z-A, 9-1)</option>
+          </select>
+        </div>
+
+        <!-- Tamaño de página y refresco -->
+        <div class="form-group">
+          <label for="pageSizeSelect">Items / Pág.</label>
+          <div class="input-with-button">
+            <select id="pageSizeSelect" class="form-select" style="min-width: 80px;">
+              <option value="5">5</option>
+              <option value="10" selected>10</option>
+              <option value="25">25</option>
+              <option value="50">50</option>
+            </select>
+            <button id="btnRefresh" class="btn btn-secondary btn-icon" title="Refrescar datos">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Listado Paginado de Categorías -->
+    <section class="panel-card">
+      <div class="section-header">
+        <h2>
+          <svg style="width: 20px; height: 20px; color: var(--primary);" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+          </svg>
+          Listado de Categorías
+        </h2>
+        <span id="totalCountBadge" class="stats-pill">Cargando...</span>
+      </div>
+
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="width: 80px;">ID</th>
+              <th style="width: 70px;">Imagen</th>
+              <th>Nombre de Categoría</th>
+              <th>Descripción</th>
+              <th style="width: 140px;">Public ID</th>
+              <th style="width: 120px;">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="categoriesTableBody">
+            <!-- Filas dinámicas inyectadas por app.js -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Barra de Paginación -->
+      <div id="paginationContainer" class="pagination-container">
+        <div id="paginationInfo" class="pagination-info">
+          <!-- Información de paginación inyectada por app.js -->
+        </div>
+        <div id="paginationButtons" class="pagination-buttons">
+          <!-- Botones de página inyectados por app.js -->
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ================= MODAL DE CONFIRMACIÓN DE ELIMINACIÓN ================= -->
+  <div id="deleteModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Confirmar Eliminación</h3>
+        <button id="btnCloseDeleteModal" class="toast-close" style="font-size: 1.25rem;">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div style="display: flex; gap: 1rem; align-items: flex-start;">
+          <div style="width: 44px; height: 44px; border-radius: 50%; background: var(--danger-light); color: var(--danger); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <svg style="width: 24px; height: 24px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <div>
+            <p style="font-size: 0.95rem; margin-bottom: 0.5rem;">¿Está seguro que desea eliminar permanentemente esta categoría?</p>
+            <p style="color: var(--text-muted); font-size: 0.85rem;">
+              ID: <strong id="deleteCategoryId" style="color: var(--primary);"></strong> - 
+              <strong id="deleteCategoryName" style="color: var(--text-main);"></strong>
+            </p>
+            <p style="color: var(--danger); font-size: 0.775rem; margin-top: 0.5rem;">Esta acción eliminará el registro de la base de datos MySQL.</p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="btnCancelDelete" class="btn btn-secondary">Cancelar</button>
+        <button id="btnConfirmDelete" class="btn btn-danger">Sí, Eliminar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL DE DETALLE DE CATEGORÍA ================= -->
+  <div id="detailModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Detalle de Categoría</h3>
+        <button id="btnCloseDetailModal" class="toast-close" style="font-size: 1.25rem;">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="detail-image-box">
+          <img id="detailImage" src="" alt="Imagen de categoría">
+        </div>
+        <div class="detail-grid">
+          <div class="detail-item">
+            <div class="detail-label">ID Categoría</div>
+            <div id="detailId" class="detail-value cat-id-badge"></div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Public ID</div>
+            <div id="detailPublicId" class="detail-value"></div>
+          </div>
+          <div class="detail-item full-width">
+            <div class="detail-label">Nombre</div>
+            <div id="detailName" class="detail-value" style="font-weight: 600; font-size: 1rem;"></div>
+          </div>
+          <div class="detail-item full-width">
+            <div class="detail-label">Descripción</div>
+            <div id="detailDesc" class="detail-value"></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="btnCloseDetailBtn" class="btn btn-secondary">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= CONTENEDOR DE NOTIFICACIONES TOAST ================= -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
